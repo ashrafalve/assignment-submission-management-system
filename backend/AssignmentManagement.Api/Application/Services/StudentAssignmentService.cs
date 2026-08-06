@@ -4,6 +4,7 @@ using AssignmentManagement.Api.Application.DTOs.Teacher;
 using AssignmentManagement.Api.Application.Interfaces;
 using AssignmentManagement.Api.Domain.Entities;
 using AssignmentManagement.Api.Domain.Enums;
+using AssignmentManagement.Api.Domain.Exceptions;
 using AssignmentManagement.Api.Domain.Interfaces;
 using AssignmentManagement.Api.Shared;
 
@@ -34,11 +35,11 @@ public class StudentAssignmentService : IStudentAssignmentService
     private async Task<User> GetStudentWithClassAsync(Guid studentId, CancellationToken cancellationToken)
     {
         var student = await _userRepo.GetByIdAsync(studentId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Student with id '{studentId}' was not found.");
+            ?? throw new NotFoundException("User", studentId);
 
         if (!student.ClassId.HasValue)
         {
-            throw new InvalidOperationException("You are not assigned to any class. Please contact your administrator.");
+            throw new BusinessRuleException("You are not assigned to any class. Please contact your administrator.");
         }
 
         return student;
@@ -62,16 +63,16 @@ public class StudentAssignmentService : IStudentAssignmentService
     {
         var student = await GetStudentWithClassAsync(studentId, cancellationToken);
         var assignment = await _assignmentRepo.GetByIdDetailedAsync(assignmentId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Assignment with id '{assignmentId}' was not found.");
+            ?? throw new NotFoundException("Assignment", assignmentId);
 
         if (assignment.ClassId != student.ClassId!.Value)
         {
-            throw new UnauthorizedAccessException("This assignment is not for your assigned class.");
+            throw new ForbiddenException("This assignment is not for your assigned class.");
         }
 
         if (assignment.Status != AssignmentStatus.Published)
         {
-            throw new UnauthorizedAccessException("This assignment is not published yet.");
+            throw new ForbiddenException("This assignment is not published yet.");
         }
 
         var submission = await _submissionRepo.GetByAssignmentAndStudentAsync(assignmentId, studentId, cancellationToken);
@@ -89,26 +90,29 @@ public class StudentAssignmentService : IStudentAssignmentService
         var student = await GetStudentWithClassAsync(studentId, cancellationToken);
 
         var assignment = await _assignmentRepo.GetByIdDetailedAsync(dto.AssignmentId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Assignment with id '{dto.AssignmentId}' was not found.");
+            ?? throw new NotFoundException("Assignment", dto.AssignmentId);
 
         if (assignment.ClassId != student.ClassId!.Value)
         {
-            throw new UnauthorizedAccessException("This assignment is not for your assigned class.");
+            throw new ForbiddenException("This assignment is not for your assigned class.");
         }
 
         if (assignment.Status != AssignmentStatus.Published)
         {
-            throw new InvalidOperationException("You cannot submit to an unpublished assignment.");
+            throw new BusinessRuleException("You cannot submit work to an assignment that is not published.");
         }
 
-        // Deadline check
-        var isLate = DateTime.UtcNow > assignment.DueDate;
+        // Deadline check for submission
+        if (DateTime.UtcNow > assignment.DueDate)
+        {
+            throw new BusinessRuleException("The deadline for this assignment has passed. Submissions are no longer accepted.");
+        }
 
         // Check if existing submission exists
         var existing = await _submissionRepo.GetByAssignmentAndStudentAsync(dto.AssignmentId, studentId, cancellationToken);
         if (existing != null)
         {
-            throw new InvalidOperationException("You have already submitted for this assignment. Please use the update endpoint to revise your submission.");
+            throw new ConflictException("You have already submitted for this assignment. Please use the update endpoint to revise your submission.");
         }
 
         var submission = new Submission
@@ -117,7 +121,7 @@ public class StudentAssignmentService : IStudentAssignmentService
             StudentId    = studentId,
             Content      = dto.Content?.Trim(),
             FilePath     = dto.FilePath?.Trim(),
-            Status       = isLate ? SubmissionStatus.Late : SubmissionStatus.Submitted,
+            Status       = SubmissionStatus.Submitted,
             SubmittedAt  = DateTime.UtcNow
         };
 
@@ -134,22 +138,22 @@ public class StudentAssignmentService : IStudentAssignmentService
         var student = await GetStudentWithClassAsync(studentId, cancellationToken);
 
         var submission = await _submissionRepo.GetByIdDetailedAsync(submissionId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Submission with id '{submissionId}' was not found.");
+            ?? throw new NotFoundException("Submission", submissionId);
 
         if (submission.StudentId != studentId)
         {
-            throw new UnauthorizedAccessException("You can only update your own submission.");
+            throw new ForbiddenException("You can only update your own submission.");
         }
 
-        // Check deadline constraint: "Update Submission before deadline"
+        // Check deadline constraint: "Student can update before deadline"
         if (DateTime.UtcNow > submission.Assignment.DueDate)
         {
-            throw new InvalidOperationException("The assignment deadline has passed. Updates to submissions are no longer allowed.");
+            throw new BusinessRuleException("The assignment deadline has passed. Submissions can no longer be updated after the deadline.");
         }
 
         if (submission.Status == SubmissionStatus.Graded)
         {
-            throw new InvalidOperationException("This submission has already been graded and cannot be modified.");
+            throw new BusinessRuleException("This submission has already been graded and cannot be modified.");
         }
 
         if (dto.Content is not null)  submission.Content  = dto.Content.Trim();

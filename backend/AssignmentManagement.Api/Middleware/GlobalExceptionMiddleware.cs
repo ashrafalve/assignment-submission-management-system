@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using AssignmentManagement.Api.Domain.Exceptions;
 using AssignmentManagement.Api.Shared;
 
 namespace AssignmentManagement.Api.Middleware;
@@ -38,13 +39,18 @@ public class GlobalExceptionMiddleware
 
         var (statusCode, message) = exception switch
         {
-            ArgumentNullException     => (HttpStatusCode.BadRequest,          "A required argument was null."),
-            ArgumentException         => (HttpStatusCode.BadRequest,          exception.Message),
-            KeyNotFoundException      => (HttpStatusCode.NotFound,            "The requested resource was not found."),
-            UnauthorizedAccessException => (HttpStatusCode.Unauthorized,      "You are not authorized to perform this action."),
-            InvalidOperationException => (HttpStatusCode.UnprocessableContent,"Invalid operation: " + exception.Message),
-            NotImplementedException   => (HttpStatusCode.NotImplemented,      "This feature is not yet implemented."),
-            _                         => (HttpStatusCode.InternalServerError, "An unexpected error occurred. Please try again later.")
+            NotFoundException ex          => (HttpStatusCode.NotFound,            ex.Message),
+            KeyNotFoundException ex       => (HttpStatusCode.NotFound,            ex.Message),
+            ForbiddenException ex         => (HttpStatusCode.Forbidden,           ex.Message),
+            UnauthorizedAccessException ex => (HttpStatusCode.Unauthorized,       ex.Message),
+            BadRequestException ex        => (HttpStatusCode.BadRequest,          ex.Message),
+            ArgumentNullException         => (HttpStatusCode.BadRequest,          "A required argument was null."),
+            ArgumentException ex          => (HttpStatusCode.BadRequest,          ex.Message),
+            ConflictException ex          => (HttpStatusCode.Conflict,            ex.Message),
+            BusinessRuleException ex      => (HttpStatusCode.UnprocessableContent,ex.Message),
+            InvalidOperationException ex  => (HttpStatusCode.BadRequest,          ex.Message),
+            NotImplementedException       => (HttpStatusCode.NotImplemented,      "This feature is not yet implemented."),
+            _                             => (HttpStatusCode.InternalServerError, "An unexpected error occurred. Please try again later.")
         };
 
         context.Response.StatusCode = (int)statusCode;

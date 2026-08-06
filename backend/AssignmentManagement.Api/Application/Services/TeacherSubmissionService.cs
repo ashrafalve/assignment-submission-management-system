@@ -4,6 +4,7 @@ using AssignmentManagement.Api.Application.DTOs.Teacher;
 using AssignmentManagement.Api.Application.Interfaces;
 using AssignmentManagement.Api.Domain.Entities;
 using AssignmentManagement.Api.Domain.Enums;
+using AssignmentManagement.Api.Domain.Exceptions;
 using AssignmentManagement.Api.Domain.Interfaces;
 using AssignmentManagement.Api.Shared;
 
@@ -32,11 +33,11 @@ public class TeacherSubmissionService : ITeacherSubmissionService
         Guid teacherId, Guid assignmentId, PaginationParams pagination, CancellationToken cancellationToken = default)
     {
         var assignment = await _assignmentRepo.GetByIdAsync(assignmentId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Assignment with id '{assignmentId}' was not found.");
+            ?? throw new NotFoundException("Assignment", assignmentId);
 
         if (assignment.TeacherId != teacherId)
         {
-            throw new UnauthorizedAccessException("You can only view submissions for assignments created by yourself.");
+            throw new ForbiddenException("You can only view submissions for assignments created by yourself.");
         }
 
         var paged = await _submissionRepo.GetSubmissionsForAssignmentAsync(assignmentId, pagination, cancellationToken);
@@ -52,11 +53,11 @@ public class TeacherSubmissionService : ITeacherSubmissionService
         Guid teacherId, Guid submissionId, CancellationToken cancellationToken = default)
     {
         var submission = await _submissionRepo.GetByIdDetailedAsync(submissionId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Submission with id '{submissionId}' was not found.");
+            ?? throw new NotFoundException("Submission", submissionId);
 
         if (submission.Assignment.TeacherId != teacherId)
         {
-            throw new UnauthorizedAccessException("You can only view submissions for assignments created by yourself.");
+            throw new ForbiddenException("You can only view submissions for assignments created by yourself.");
         }
 
         return _mapper.Map<SubmissionDto>(submission);
@@ -66,17 +67,17 @@ public class TeacherSubmissionService : ITeacherSubmissionService
         Guid teacherId, Guid submissionId, GradeSubmissionDto dto, CancellationToken cancellationToken = default)
     {
         var submission = await _submissionRepo.GetByIdDetailedAsync(submissionId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Submission with id '{submissionId}' was not found.");
+            ?? throw new NotFoundException("Submission", submissionId);
 
         if (submission.Assignment.TeacherId != teacherId)
         {
-            throw new UnauthorizedAccessException("You can only grade submissions for assignments created by yourself.");
+            throw new ForbiddenException("You can only grade submissions for assignments created by yourself.");
         }
 
         // Marks validation rule: Marks cannot exceed MaxMarks (TotalMarks)
         if (dto.MarksObtained > submission.Assignment.TotalMarks)
         {
-            throw new InvalidOperationException($"Marks obtained ({dto.MarksObtained}) cannot exceed the maximum marks ({submission.Assignment.TotalMarks}) for this assignment.");
+            throw new BusinessRuleException($"Marks obtained ({dto.MarksObtained}) cannot exceed maximum marks ({submission.Assignment.TotalMarks}) for this assignment.");
         }
 
         submission.MarksObtained = dto.MarksObtained;
@@ -94,11 +95,11 @@ public class TeacherSubmissionService : ITeacherSubmissionService
         Guid teacherId, Guid submissionId, ChangeSubmissionStatusDto dto, CancellationToken cancellationToken = default)
     {
         var submission = await _submissionRepo.GetByIdDetailedAsync(submissionId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Submission with id '{submissionId}' was not found.");
+            ?? throw new NotFoundException("Submission", submissionId);
 
         if (submission.Assignment.TeacherId != teacherId)
         {
-            throw new UnauthorizedAccessException("You can only review submissions for assignments created by yourself.");
+            throw new ForbiddenException("You can only review submissions for assignments created by yourself.");
         }
 
         submission.Status = dto.Status;

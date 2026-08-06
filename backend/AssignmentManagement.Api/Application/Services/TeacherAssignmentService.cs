@@ -3,6 +3,7 @@ using AssignmentManagement.Api.Application.DTOs.Teacher;
 using AssignmentManagement.Api.Application.Interfaces;
 using AssignmentManagement.Api.Domain.Entities;
 using AssignmentManagement.Api.Domain.Enums;
+using AssignmentManagement.Api.Domain.Exceptions;
 using AssignmentManagement.Api.Domain.Interfaces;
 using AssignmentManagement.Api.Shared;
 
@@ -37,17 +38,17 @@ public class TeacherAssignmentService : ITeacherAssignmentService
     {
         // 1. Verify subject exists
         _ = await _subjectRepo.GetByIdAsync(dto.SubjectId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Subject with id '{dto.SubjectId}' was not found.");
+            ?? throw new NotFoundException("Subject", dto.SubjectId);
 
         // 2. Verify class exists
         _ = await _classRepo.GetByIdAsync(dto.ClassId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Class with id '{dto.ClassId}' was not found.");
+            ?? throw new NotFoundException("Class", dto.ClassId);
 
         // 3. Verify teacher is assigned to teach this subject in this class
         var isAssigned = await _tsRepo.AssignmentExistsAsync(teacherId, dto.SubjectId, dto.ClassId, cancellationToken);
         if (!isAssigned)
         {
-            throw new UnauthorizedAccessException("You are not assigned to teach this subject for the selected class.");
+            throw new ForbiddenException("You are not assigned to teach this subject for the selected class.");
         }
 
         var assignment = new Assignment
@@ -72,11 +73,11 @@ public class TeacherAssignmentService : ITeacherAssignmentService
     public async Task<AssignmentDto> UpdateAssignmentAsync(Guid teacherId, Guid assignmentId, UpdateAssignmentDto dto, CancellationToken cancellationToken = default)
     {
         var assignment = await _assignmentRepo.GetByIdAsync(assignmentId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Assignment with id '{assignmentId}' was not found.");
+            ?? throw new NotFoundException("Assignment", assignmentId);
 
         if (assignment.TeacherId != teacherId)
         {
-            throw new UnauthorizedAccessException("You can only modify assignments created by yourself.");
+            throw new ForbiddenException("You can only modify assignments created by yourself.");
         }
 
         var targetClassId   = dto.ClassId   ?? assignment.ClassId;
@@ -87,7 +88,7 @@ public class TeacherAssignmentService : ITeacherAssignmentService
             var isAssigned = await _tsRepo.AssignmentExistsAsync(teacherId, targetSubjectId, targetClassId, cancellationToken);
             if (!isAssigned)
             {
-                throw new UnauthorizedAccessException("You are not assigned to teach this subject for the selected class.");
+                throw new ForbiddenException("You are not assigned to teach this subject for the selected class.");
             }
         }
 
@@ -107,11 +108,11 @@ public class TeacherAssignmentService : ITeacherAssignmentService
     public async Task<AssignmentDto> PublishAssignmentAsync(Guid teacherId, Guid assignmentId, CancellationToken cancellationToken = default)
     {
         var assignment = await _assignmentRepo.GetByIdAsync(assignmentId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Assignment with id '{assignmentId}' was not found.");
+            ?? throw new NotFoundException("Assignment", assignmentId);
 
         if (assignment.TeacherId != teacherId)
         {
-            throw new UnauthorizedAccessException("You can only publish assignments created by yourself.");
+            throw new ForbiddenException("You can only publish assignments created by yourself.");
         }
 
         assignment.Status = AssignmentStatus.Published;
@@ -124,11 +125,11 @@ public class TeacherAssignmentService : ITeacherAssignmentService
     public async Task<AssignmentDto> SaveDraftAssignmentAsync(Guid teacherId, Guid assignmentId, CancellationToken cancellationToken = default)
     {
         var assignment = await _assignmentRepo.GetByIdAsync(assignmentId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Assignment with id '{assignmentId}' was not found.");
+            ?? throw new NotFoundException("Assignment", assignmentId);
 
         if (assignment.TeacherId != teacherId)
         {
-            throw new UnauthorizedAccessException("You can only edit assignments created by yourself.");
+            throw new ForbiddenException("You can only edit assignments created by yourself.");
         }
 
         assignment.Status = AssignmentStatus.Draft;
@@ -141,11 +142,11 @@ public class TeacherAssignmentService : ITeacherAssignmentService
     public async Task DeleteAssignmentAsync(Guid teacherId, Guid assignmentId, CancellationToken cancellationToken = default)
     {
         var assignment = await _assignmentRepo.GetByIdAsync(assignmentId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Assignment with id '{assignmentId}' was not found.");
+            ?? throw new NotFoundException("Assignment", assignmentId);
 
         if (assignment.TeacherId != teacherId)
         {
-            throw new UnauthorizedAccessException("You can only delete assignments created by yourself.");
+            throw new ForbiddenException("You can only delete assignments created by yourself.");
         }
 
         await _assignmentRepo.DeleteAsync(assignmentId, cancellationToken);
@@ -165,11 +166,11 @@ public class TeacherAssignmentService : ITeacherAssignmentService
     public async Task<AssignmentDto> GetAssignmentByIdAsync(Guid teacherId, Guid assignmentId, CancellationToken cancellationToken = default)
     {
         var assignment = await _assignmentRepo.GetByIdDetailedAsync(assignmentId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Assignment with id '{assignmentId}' was not found.");
+            ?? throw new NotFoundException("Assignment", assignmentId);
 
         if (assignment.TeacherId != teacherId)
         {
-            throw new UnauthorizedAccessException("You can only view assignments created by yourself.");
+            throw new ForbiddenException("You can only view assignments created by yourself.");
         }
 
         return _mapper.Map<AssignmentDto>(assignment);
