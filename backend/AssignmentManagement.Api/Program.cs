@@ -88,6 +88,7 @@ try
     builder.Services.AddScoped<ITeacherSubjectService, TeacherSubjectService>();
     builder.Services.AddScoped<ITeacherAssignmentService, TeacherAssignmentService>();
     builder.Services.AddScoped<IStudentAssignmentService, StudentAssignmentService>();
+    builder.Services.AddScoped<ITeacherSubmissionService, TeacherSubmissionService>();
 
     // ─── Infrastructure Services ──────────────────────────────────────────────
     builder.Services.AddScoped<IJwtService, JwtService>();
