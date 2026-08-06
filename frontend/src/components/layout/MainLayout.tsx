@@ -8,11 +8,15 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { usePathname } from 'next/navigation';
 
+import { ToastProvider } from '@/contexts/ToastContext';
+
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </QueryProvider>
       </AuthProvider>
     </ThemeProvider>
   );
