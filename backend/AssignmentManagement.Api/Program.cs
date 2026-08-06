@@ -77,6 +77,7 @@ try
     builder.Services.AddScoped<IClassRepository, ClassRepository>();
     builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
     builder.Services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
+    builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
 
     // ─── Application Services ─────────────────────────────────────────────────
     builder.Services.AddScoped<IAuthService, AuthService>();
@@ -84,6 +85,7 @@ try
     builder.Services.AddScoped<IClassService, ClassService>();
     builder.Services.AddScoped<ISubjectService, SubjectService>();
     builder.Services.AddScoped<ITeacherSubjectService, TeacherSubjectService>();
+    builder.Services.AddScoped<ITeacherAssignmentService, TeacherAssignmentService>();
 
     // ─── Infrastructure Services ──────────────────────────────────────────────
     builder.Services.AddScoped<IJwtService, JwtService>();

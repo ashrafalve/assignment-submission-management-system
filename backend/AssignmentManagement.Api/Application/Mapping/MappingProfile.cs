@@ -1,6 +1,7 @@
 using AutoMapper;
 using AssignmentManagement.Api.Application.DTOs.Admin;
 using AssignmentManagement.Api.Application.DTOs.Auth;
+using AssignmentManagement.Api.Application.DTOs.Teacher;
 using AssignmentManagement.Api.Domain.Entities;
 
 namespace AssignmentManagement.Api.Application.Mapping;
@@ -37,5 +38,14 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject != null ? src.Subject.Name : string.Empty))
             .ForMember(dest => dest.SubjectCode, opt => opt.MapFrom(src => src.Subject != null ? src.Subject.Code : string.Empty))
             .ForMember(dest => dest.ClassName,   opt => opt.MapFrom(src => src.Class != null ? src.Class.Name : string.Empty));
+
+        // ── Assignment ────────────────────────────────────────────────────────
+        CreateMap<Assignment, AssignmentDto>()
+            .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher != null ? src.Teacher.FullName : string.Empty))
+            .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject != null ? src.Subject.Name : string.Empty))
+            .ForMember(dest => dest.SubjectCode, opt => opt.MapFrom(src => src.Subject != null ? src.Subject.Code : string.Empty))
+            .ForMember(dest => dest.ClassName,   opt => opt.MapFrom(src => src.Class != null ? src.Class.Name : string.Empty));
+
+        CreateMap<CreateAssignmentDto, Assignment>();
     }
 }
