@@ -1,15 +1,19 @@
 using AutoMapper;
+using AssignmentManagement.Api.Application.DTOs.Auth;
+using AssignmentManagement.Api.Domain.Entities;
 
 namespace AssignmentManagement.Api.Application.Mapping;
 
 /// <summary>
-/// AutoMapper profile placeholder.
-/// Business entity mapping profiles will be added in subsequent steps.
+/// AutoMapper profile containing all entity ↔ DTO mapping configurations.
 /// </summary>
 public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        // Mapping configurations will be added per entity in upcoming steps.
+        // ── User ──────────────────────────────────────────────────────────────
+        CreateMap<User, UserDto>()
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
+            .ForMember(dest => dest.Role,     opt => opt.MapFrom(src => src.Role.ToString()));
     }
 }

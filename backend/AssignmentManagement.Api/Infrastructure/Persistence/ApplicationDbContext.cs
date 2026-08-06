@@ -4,8 +4,7 @@ using AssignmentManagement.Api.Domain.Entities;
 namespace AssignmentManagement.Api.Infrastructure.Persistence;
 
 /// <summary>
-/// Application database context. All DbSet properties will be added
-/// as business entities are introduced in subsequent steps.
+/// Application database context managing all entity sets.
 /// </summary>
 public class ApplicationDbContext : DbContext
 {
@@ -13,6 +12,10 @@ public class ApplicationDbContext : DbContext
         : base(options)
     {
     }
+
+    // ── DbSets ────────────────────────────────────────────────────────────────
+    public DbSet<User> Users => Set<User>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

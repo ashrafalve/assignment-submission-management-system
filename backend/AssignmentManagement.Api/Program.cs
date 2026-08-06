@@ -14,6 +14,8 @@ using AssignmentManagement.Api.Infrastructure.Persistence;
 using AssignmentManagement.Api.Infrastructure.Repositories;
 using AssignmentManagement.Api.Domain.Interfaces;
 using AssignmentManagement.Api.Application.Mapping;
+using AssignmentManagement.Api.Application.Interfaces;
+using AssignmentManagement.Api.Application.Services;
 using AssignmentManagement.Api.Middleware;
 
 // ─── Load .env file (development only) ───────────────────────────────────────
@@ -71,6 +73,13 @@ try
     // ─── Repositories & Unit of Work ─────────────────────────────────────────
     builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+    // ─── Application Services ─────────────────────────────────────────────────
+    builder.Services.AddScoped<IAuthService, AuthService>();
+
+    // ─── Infrastructure Services ──────────────────────────────────────────────
+    builder.Services.AddScoped<IJwtService, JwtService>();
 
     // ─── AutoMapper (16+ API) ─────────────────────────────────────────────────────
     builder.Services.AddAutoMapper(cfg =>
