@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Input } from './input';
 import { TableSkeleton } from './skeleton';
 import { EmptyState } from './empty-state';
 import { Pagination, PaginationProps } from './pagination';
+import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
 export interface Column<T> {
@@ -27,6 +28,8 @@ export interface DataTableProps<T> {
   searchPlaceholder?: string;
   emptyTitle?: string;
   emptyDescription?: string;
+  emptyActionLabel?: string;
+  onEmptyAction?: () => void;
 }
 
 export function DataTable<T>({
@@ -40,16 +43,20 @@ export function DataTable<T>({
   searchPlaceholder = 'Search records...',
   emptyTitle = 'No records found',
   emptyDescription = 'There are no items to display matching your criteria.',
+  emptyActionLabel,
+  onEmptyAction,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 350);
+
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDesc, setSortDesc] = useState(false);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setSearchTerm(val);
-    if (onSearch) onSearch(val);
-  };
+  useEffect(() => {
+    if (onSearch) {
+      onSearch(debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm, onSearch]);
 
   const handleSortClick = (key: string) => {
     const isDesc = sortKey === key ? !sortDesc : false;
@@ -67,16 +74,16 @@ export function DataTable<T>({
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               value={searchTerm}
-              onChange={handleSearchChange}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={searchPlaceholder}
-              className="pl-9 h-10"
+              className="pl-9 h-10 shadow-sm"
             />
           </div>
         </div>
       )}
 
       {/* Table Container */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm transition-all">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
@@ -120,7 +127,12 @@ export function DataTable<T>({
               ) : data.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length} className="p-4">
-                    <EmptyState title={emptyTitle} description={emptyDescription} />
+                    <EmptyState
+                      title={emptyTitle}
+                      description={emptyDescription}
+                      actionLabel={emptyActionLabel}
+                      onAction={onEmptyAction}
+                    />
                   </td>
                 </tr>
               ) : (
