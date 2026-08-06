@@ -56,6 +56,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasDefaultValue(false);
 
+        // Class relationship (optional for Admin/Teacher, used for Student)
+        builder.HasOne(u => u.Class)
+            .WithMany()
+            .HasForeignKey(u => u.ClassId)
+            .OnDelete(DeleteBehavior.SetNull)
+            .HasConstraintName("FK_Users_Classes_ClassId");
+
         // Ignore computed property
         builder.Ignore(u => u.FullName);
     }

@@ -14,4 +14,5 @@ public class RegisterRequestDto
     /// Defaults to "Student" if not supplied.
     /// </summary>
     public string Role { get; set; } = "Student";
+    public Guid? ClassId { get; set; }
 }

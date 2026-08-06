@@ -17,6 +17,9 @@ public class User : BaseEntity
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiresAt { get; set; }
 
+    public Guid? ClassId { get; set; }
+    public SchoolClass? Class { get; set; }
+
     /// <summary>Full name computed from first + last name.</summary>
     public string FullName => $"{FirstName} {LastName}".Trim();
 

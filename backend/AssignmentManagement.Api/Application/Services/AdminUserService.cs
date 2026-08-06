@@ -107,6 +107,7 @@ public class AdminUserService : IAdminUserService
             Email        = dto.Email.Trim().ToLowerInvariant(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12),
             Role         = role,
+            ClassId      = dto.ClassId,
             IsActive     = true
         };
 
@@ -126,6 +127,7 @@ public class AdminUserService : IAdminUserService
         if (dto.FirstName is not null) user.FirstName = dto.FirstName.Trim();
         if (dto.LastName  is not null) user.LastName  = dto.LastName.Trim();
         if (dto.IsActive  is not null) user.IsActive  = dto.IsActive.Value;
+        if (dto.ClassId   is not null) user.ClassId   = dto.ClassId.Value;
 
         if (dto.Role is not null)
         {

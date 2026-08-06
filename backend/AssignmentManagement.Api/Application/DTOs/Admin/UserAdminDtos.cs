@@ -7,6 +7,7 @@ public class CreateUserDto
     public string Email     { get; set; } = string.Empty;
     public string Password  { get; set; } = string.Empty;
     public string Role      { get; set; } = "Student";
+    public Guid?  ClassId   { get; set; }
 }
 
 public class UpdateUserDto
@@ -15,6 +16,7 @@ public class UpdateUserDto
     public string? LastName  { get; set; }
     public string? Role      { get; set; }
     public bool?   IsActive  { get; set; }
+    public Guid?   ClassId   { get; set; }
 }
 
 public class ChangePasswordDto
@@ -29,6 +31,8 @@ public class UserListItemDto
     public string   FullName    { get; set; } = string.Empty;
     public string   Email       { get; set; } = string.Empty;
     public string   Role        { get; set; } = string.Empty;
+    public Guid?    ClassId     { get; set; }
+    public string?  ClassName   { get; set; }
     public bool     IsActive    { get; set; }
     public DateTime CreatedAt   { get; set; }
     public DateTime? LastLoginAt { get; set; }

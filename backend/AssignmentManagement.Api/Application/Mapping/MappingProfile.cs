@@ -1,6 +1,7 @@
 using AutoMapper;
 using AssignmentManagement.Api.Application.DTOs.Admin;
 using AssignmentManagement.Api.Application.DTOs.Auth;
+using AssignmentManagement.Api.Application.DTOs.Student;
 using AssignmentManagement.Api.Application.DTOs.Teacher;
 using AssignmentManagement.Api.Domain.Entities;
 
@@ -15,12 +16,14 @@ public class MappingProfile : Profile
     {
         // ── User ──────────────────────────────────────────────────────────────
         CreateMap<User, UserDto>()
-            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-            .ForMember(dest => dest.Role,     opt => opt.MapFrom(src => src.Role.ToString()));
+            .ForMember(dest => dest.FullName,  opt => opt.MapFrom(src => src.FullName))
+            .ForMember(dest => dest.Role,      opt => opt.MapFrom(src => src.Role.ToString()))
+            .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Class != null ? src.Class.Name : null));
 
         CreateMap<User, UserListItemDto>()
-            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-            .ForMember(dest => dest.Role,     opt => opt.MapFrom(src => src.Role.ToString()));
+            .ForMember(dest => dest.FullName,  opt => opt.MapFrom(src => src.FullName))
+            .ForMember(dest => dest.Role,      opt => opt.MapFrom(src => src.Role.ToString()))
+            .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Class != null ? src.Class.Name : null));
 
         // ── Class ─────────────────────────────────────────────────────────────
         CreateMap<SchoolClass, ClassDto>()
@@ -47,5 +50,12 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.ClassName,   opt => opt.MapFrom(src => src.Class != null ? src.Class.Name : string.Empty));
 
         CreateMap<CreateAssignmentDto, Assignment>();
+
+        // ── Submission ────────────────────────────────────────────────────────
+        CreateMap<Submission, SubmissionDto>()
+            .ForMember(dest => dest.AssignmentTitle, opt => opt.MapFrom(src => src.Assignment != null ? src.Assignment.Title : string.Empty))
+            .ForMember(dest => dest.DueDate,         opt => opt.MapFrom(src => src.Assignment != null ? src.Assignment.DueDate : default))
+            .ForMember(dest => dest.TotalMarks,      opt => opt.MapFrom(src => src.Assignment != null ? src.Assignment.TotalMarks : 0))
+            .ForMember(dest => dest.StudentName,     opt => opt.MapFrom(src => src.Student != null ? src.Student.FullName : string.Empty));
     }
 }

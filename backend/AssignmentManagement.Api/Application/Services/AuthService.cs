@@ -73,6 +73,7 @@ public class AuthService : IAuthService
             Email        = request.Email.Trim().ToLowerInvariant(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12),
             Role         = role,
+            ClassId      = request.ClassId,
             IsActive     = true,
             RefreshToken = _jwtService.GenerateRefreshToken(),
             RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7)
