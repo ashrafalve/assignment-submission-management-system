@@ -6,12 +6,24 @@ A full-stack, enterprise-grade application for managing academic assignments, st
 
 ## ⚡ Quick Start Instructions
 
-### 1. Start the Backend API (.NET 10 & EF Core)
+### 1. Start Database & Backend API (.NET 10 & EF Core)
 
+> 💡 *Note: The backend requires PostgreSQL running on port 5432.*
+
+**Option A: Start PostgreSQL in Docker (Recommended)**
 ```bash
-cd backend/AssignmentManagement.Api
+cd backend
+docker-compose up -d postgres
+cd AssignmentManagement.Api
 dotnet run
 ```
+
+**Option B: Full Docker Compose Stack**
+```bash
+cd backend
+docker-compose up --build
+```
+
 > 📍 **Backend API & Swagger Docs:** [http://localhost:5000](http://localhost:5000)
 
 ---
@@ -30,7 +42,7 @@ npm run dev
 
 ## 🔑 Demo Login Credentials
 
-The database is automatically seeded on backend startup with the following test accounts:
+The database is automatically seeded on startup with the following test accounts:
 
 | Role | Email | Password | Description |
 |---|---|---|---|
@@ -46,5 +58,5 @@ The database is automatically seeded on backend startup with the following test 
 
 ## 🛠️ Technology Stack
 
-- **Backend**: ASP.NET Core 10, Entity Framework Core 10, PostgreSQL / In-Memory Db, JWT Bearer Authentication, BCrypt Password Hashing, Serilog.
+- **Backend**: ASP.NET Core 10, Entity Framework Core 10, PostgreSQL, JWT Bearer Authentication, BCrypt Password Hashing, Serilog.
 - **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS, TanStack Query v5, React Hook Form, Zod, Axios, Lucide Icons, Shadcn UI.

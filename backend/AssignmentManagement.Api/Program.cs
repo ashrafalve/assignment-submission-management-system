@@ -246,9 +246,16 @@ try
     // ─── Auto-migrate & seed database on startup (development only) ───────────
     if (app.Environment.IsDevelopment())
     {
-        using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await DbSeeder.SeedAsync(db);
+        try
+        {
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await DbSeeder.SeedAsync(db);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Could not connect to PostgreSQL database at localhost:5432. Please ensure PostgreSQL service is started or run 'docker-compose up -d postgres' in the backend directory.");
+        }
     }
 
     Log.Information("AssignmentManagement API started successfully.");
