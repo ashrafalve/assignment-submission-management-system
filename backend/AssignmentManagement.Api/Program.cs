@@ -74,9 +74,16 @@ try
     builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IClassRepository, ClassRepository>();
+    builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+    builder.Services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
 
     // ─── Application Services ─────────────────────────────────────────────────
     builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+    builder.Services.AddScoped<IClassService, ClassService>();
+    builder.Services.AddScoped<ISubjectService, SubjectService>();
+    builder.Services.AddScoped<ITeacherSubjectService, TeacherSubjectService>();
 
     // ─── Infrastructure Services ──────────────────────────────────────────────
     builder.Services.AddScoped<IJwtService, JwtService>();

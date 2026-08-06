@@ -19,4 +19,10 @@ public class User : BaseEntity
 
     /// <summary>Full name computed from first + last name.</summary>
     public string FullName => $"{FirstName} {LastName}".Trim();
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+    public ICollection<TeacherSubject> TeacherSubjects { get; set; } = [];   // As teacher
+    public ICollection<Assignment>     Assignments      { get; set; } = [];   // As teacher
+    public ICollection<Submission>     Submissions      { get; set; } = [];   // As student
 }
+

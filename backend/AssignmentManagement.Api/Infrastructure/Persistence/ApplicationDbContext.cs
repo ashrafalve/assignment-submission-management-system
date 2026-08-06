@@ -1,5 +1,8 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 using AssignmentManagement.Api.Domain.Entities;
+using AssignmentManagement.Api.Domain.Enums;
 
 namespace AssignmentManagement.Api.Infrastructure.Persistence;
 
@@ -14,39 +17,42 @@ public class ApplicationDbContext : DbContext
     }
 
     // ── DbSets ────────────────────────────────────────────────────────────────
-    public DbSet<User> Users => Set<User>();
-
+    public DbSet<User>           Users           => Set<User>();
+    public DbSet<SchoolClass>    Classes         => Set<SchoolClass>();
+    public DbSet<Subject>        Subjects        => Set<Subject>();
+    public DbSet<TeacherSubject> TeacherSubjects => Set<TeacherSubject>();
+    public DbSet<Assignment>     Assignments     => Set<Assignment>();
+    public DbSet<Submission>     Submissions     => Set<Submission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Apply all entity configurations from the Infrastructure.Configurations folder
+        // Apply all entity configurations from Infrastructure.Configurations
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-        // Global soft-delete query filter applied to all BaseEntity-derived types
+        // ── Global soft-delete query filter ───────────────────────────────────
+        // Applied to every entity that inherits from BaseEntity.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
-            {
-                modelBuilder.Entity(entityType.ClrType)
-                    .HasQueryFilter(
-                        System.Linq.Expressions.Expression.Lambda(
-                            System.Linq.Expressions.Expression.Not(
-                                System.Linq.Expressions.Expression.Property(
-                                    System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e"),
-                                    nameof(BaseEntity.IsDeleted)
-                                )
-                            ),
-                            System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e")
-                        )
-                    );
-            }
+            if (!typeof(BaseEntity).IsAssignableFrom(entityType.ClrType)) continue;
+
+            // Build: e => !e.IsDeleted  (with correct parameter reference)
+            var param     = Expression.Parameter(entityType.ClrType, "e");
+            var property  = Expression.Property(param, nameof(BaseEntity.IsDeleted));
+            var condition = Expression.Not(property);
+            var lambda    = Expression.Lambda(condition, param);
+
+            modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
         }
+
+        // ── Seed Data ─────────────────────────────────────────────────────────
+        SeedData(modelBuilder);
     }
 
     /// <summary>
-    /// Overrides SaveChangesAsync to automatically set audit timestamps.
+    /// Overrides SaveChangesAsync to automatically set audit timestamps
+    /// and intercept hard deletes to convert them to soft deletes.
     /// </summary>
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -64,7 +70,7 @@ public class ApplicationDbContext : DbContext
                     break;
                 case EntityState.Deleted:
                     // Convert hard delete to soft delete
-                    entry.State = EntityState.Modified;
+                    entry.State            = EntityState.Modified;
                     entry.Entity.IsDeleted = true;
                     entry.Entity.DeletedAt = DateTime.UtcNow;
                     break;
@@ -72,5 +78,51 @@ public class ApplicationDbContext : DbContext
         }
 
         return base.SaveChangesAsync(cancellationToken);
+    }
+
+    // ── Seed ──────────────────────────────────────────────────────────────────
+    private static void SeedData(ModelBuilder modelBuilder)
+    {
+        // Seed default Admin user
+        var adminId = new Guid("00000000-0000-0000-0000-000000000001");
+
+        modelBuilder.Entity<User>().HasData(new User
+        {
+            Id           = adminId,
+            FirstName    = "System",
+            LastName     = "Admin",
+            Email        = "admin@assignmentmanagement.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@1234", workFactor: 12),
+            Role         = UserRole.Admin,
+            IsActive     = true,
+            CreatedAt    = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+        });
+
+        // Seed default Subjects
+        var mathId    = new Guid("00000000-0000-0000-0000-000000000010");
+        var scienceId = new Guid("00000000-0000-0000-0000-000000000011");
+        var englishId = new Guid("00000000-0000-0000-0000-000000000012");
+
+        modelBuilder.Entity<Subject>().HasData(
+            new Subject { Id = mathId,    Name = "Mathematics", Code = "MATH-101", IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Subject { Id = scienceId, Name = "Science",     Code = "SCI-101",  IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Subject { Id = englishId, Name = "English",     Code = "ENG-101",  IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
+
+        // Seed default Classes
+        var class10AId = new Guid("00000000-0000-0000-0000-000000000020");
+        var class10BId = new Guid("00000000-0000-0000-0000-000000000021");
+
+        modelBuilder.Entity<SchoolClass>().HasData(
+            new SchoolClass { Id = class10AId, Name = "Grade 10 - Section A",
+                AcademicYear = "2026-2027", IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new SchoolClass { Id = class10BId, Name = "Grade 10 - Section B",
+                AcademicYear = "2026-2027", IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
     }
 }
