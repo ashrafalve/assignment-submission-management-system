@@ -1,0 +1,479 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AssignmentManagement.Api</name>
+    </assembly>
+    <members>
+        <member name="T:AssignmentManagement.Api.Application.DTOs.Auth.AuthResponseDto">
+            <summary>Response DTO returned after successful login or token refresh.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.DTOs.Auth.LoginRequestDto">
+            <summary>Request DTO for user login.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.DTOs.Auth.RefreshTokenRequestDto">
+            <summary>Request DTO for refreshing an access token.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.DTOs.Auth.RegisterRequestDto">
+            <summary>Request DTO for registering a new user.</summary>
+        </member>
+        <member name="P:AssignmentManagement.Api.Application.DTOs.Auth.RegisterRequestDto.Role">
+            <summary>
+            Role name as string: "Admin", "Teacher", or "Student".
+            Defaults to "Student" if not supplied.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.DTOs.Auth.UserDto">
+            <summary>Public user profile DTO (no sensitive fields).</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Interfaces.IAdminUserService">
+            <summary>Admin service for full user management.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Interfaces.IAuthService">
+            <summary>
+            Authentication service contract for login, registration, and token management.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Interfaces.IClassService">
+            <summary>Service for managing school classes.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Interfaces.IJwtService">
+            <summary>
+            JWT token generation and validation service contract.
+            </summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Application.Interfaces.IJwtService.GenerateAccessToken(AssignmentManagement.Api.Domain.Entities.User)">
+            <summary>Generates a signed JWT access token for the given user.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Application.Interfaces.IJwtService.GenerateRefreshToken">
+            <summary>Generates a cryptographically secure refresh token string.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Application.Interfaces.IJwtService.GetPrincipalFromExpiredToken(System.String)">
+            <summary>
+            Reads claims from an expired (or valid) token without validating lifetime.
+            Used during refresh token flow.
+            </summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Application.Interfaces.IJwtService.GetAccessTokenExpiry">
+            <summary>Returns the UTC expiry time for a newly generated access token.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Interfaces.ISubjectService">
+            <summary>Service for managing academic subjects.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Interfaces.ITeacherSubjectService">
+            <summary>Service for managing teacher-subject-class assignments.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Mapping.MappingProfile">
+            <summary>
+            AutoMapper profile containing all entity ↔ DTO mapping configurations.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Services.AdminUserService">
+            <summary>
+            Admin service for complete user lifecycle management.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Services.AuthService">
+            <summary>
+            Handles user authentication, registration, and token lifecycle management.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Validators.LoginRequestValidator">
+            <summary>Validates login requests.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Application.Validators.RegisterRequestValidator">
+            <summary>Validates registration requests.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Controllers.AdminUsersController">
+            <summary>Admin: Full user management (CRUD).</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AdminUsersController.GetUsers(AssignmentManagement.Api.Shared.PaginationParams,System.String,System.Threading.CancellationToken)">
+            <summary>Lists all users with pagination, search, and optional role filter.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AdminUsersController.GetUser(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a user by ID.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AdminUsersController.CreateUser(AssignmentManagement.Api.Application.DTOs.Admin.CreateUserDto,System.Threading.CancellationToken)">
+            <summary>Creates a new user with a specified role.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AdminUsersController.UpdateUser(System.Guid,AssignmentManagement.Api.Application.DTOs.Admin.UpdateUserDto,System.Threading.CancellationToken)">
+            <summary>Updates a user's details or role.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AdminUsersController.ChangePassword(System.Guid,AssignmentManagement.Api.Application.DTOs.Admin.ChangePasswordDto,System.Threading.CancellationToken)">
+            <summary>Changes a user's password (admin override).</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AdminUsersController.DeleteUser(System.Guid,System.Threading.CancellationToken)">
+            <summary>Soft-deletes a user.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Controllers.AuthController">
+            <summary>
+            Handles user authentication: registration, login, token refresh, and profile.
+            </summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AuthController.Register(AssignmentManagement.Api.Application.DTOs.Auth.RegisterRequestDto,System.Threading.CancellationToken)">
+            <summary>Registers a new user account.</summary>
+            <response code="201">User registered successfully.</response>
+            <response code="400">Validation error or email already in use.</response>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AuthController.Login(AssignmentManagement.Api.Application.DTOs.Auth.LoginRequestDto,System.Threading.CancellationToken)">
+            <summary>Authenticates a user and returns JWT access + refresh tokens.</summary>
+            <response code="200">Login successful.</response>
+            <response code="401">Invalid credentials or inactive account.</response>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AuthController.RefreshToken(AssignmentManagement.Api.Application.DTOs.Auth.RefreshTokenRequestDto,System.Threading.CancellationToken)">
+            <summary>Exchanges a valid refresh token for a new access token pair.</summary>
+            <response code="200">Tokens refreshed successfully.</response>
+            <response code="401">Invalid or expired refresh token.</response>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AuthController.RevokeToken(AssignmentManagement.Api.Application.DTOs.Auth.RefreshTokenRequestDto,System.Threading.CancellationToken)">
+            <summary>Revokes a refresh token (logout).</summary>
+            <response code="200">Token revoked successfully.</response>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AuthController.GetProfile(System.Threading.CancellationToken)">
+            <summary>Returns the authenticated user's profile.</summary>
+            <response code="200">Profile retrieved.</response>
+            <response code="401">Not authenticated.</response>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AuthController.AdminOnly">
+            <summary>Admin-only test endpoint demonstrating role-based authorization.</summary>
+            <response code="200">Authorized as Admin.</response>
+            <response code="403">Forbidden — not an Admin.</response>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.AuthController.TeacherOnly">
+            <summary>Teacher/Admin endpoint demonstrating role-based authorization.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Controllers.ClassesController">
+            <summary>Admin: Manage school classes.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.ClassesController.GetClasses(AssignmentManagement.Api.Shared.PaginationParams,System.Threading.CancellationToken)">
+            <summary>Lists all classes with pagination and search.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.ClassesController.GetClass(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a class by ID.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.ClassesController.CreateClass(AssignmentManagement.Api.Application.DTOs.Admin.CreateClassDto,System.Threading.CancellationToken)">
+            <summary>Creates a new class.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.ClassesController.UpdateClass(System.Guid,AssignmentManagement.Api.Application.DTOs.Admin.UpdateClassDto,System.Threading.CancellationToken)">
+            <summary>Updates an existing class.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.ClassesController.DeleteClass(System.Guid,System.Threading.CancellationToken)">
+            <summary>Deletes a class (soft delete).</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Controllers.HealthController">
+            <summary>
+            Health check endpoint for monitoring application and dependency status.
+            </summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.HealthController.GetHealth(System.Threading.CancellationToken)">
+            <summary>
+            Returns the overall health status of the application and its dependencies.
+            </summary>
+            <returns>Health report with individual component statuses.</returns>
+        </member>
+        <member name="T:AssignmentManagement.Api.Controllers.StudentAssignmentsController">
+            <summary>Student: View published assignments and submit work.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.StudentAssignmentsController.GetPublishedAssignments(AssignmentManagement.Api.Shared.PaginationParams,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>Lists published assignments for the student's assigned class.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.StudentAssignmentsController.GetAssignmentDetails(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets details for a specific published assignment including the student's submission if any.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.StudentAssignmentsController.SubmitAssignment(AssignmentManagement.Api.Application.DTOs.Student.SubmitAssignmentDto,System.Threading.CancellationToken)">
+            <summary>Submits work for an assignment.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.StudentAssignmentsController.UpdateSubmission(System.Guid,AssignmentManagement.Api.Application.DTOs.Student.UpdateSubmissionDto,System.Threading.CancellationToken)">
+            <summary>Updates an existing submission before the deadline.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.StudentAssignmentsController.GetMySubmissions(System.Threading.CancellationToken)">
+            <summary>Lists all submissions made by the student.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Controllers.SubjectsController">
+            <summary>Admin: Manage academic subjects.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.SubjectsController.GetSubjects(AssignmentManagement.Api.Shared.PaginationParams,System.Threading.CancellationToken)">
+            <summary>Lists all subjects with pagination and search.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.SubjectsController.GetSubject(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a subject by ID.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.SubjectsController.CreateSubject(AssignmentManagement.Api.Application.DTOs.Admin.CreateSubjectDto,System.Threading.CancellationToken)">
+            <summary>Creates a new subject.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.SubjectsController.UpdateSubject(System.Guid,AssignmentManagement.Api.Application.DTOs.Admin.UpdateSubjectDto,System.Threading.CancellationToken)">
+            <summary>Updates an existing subject.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.SubjectsController.DeleteSubject(System.Guid,System.Threading.CancellationToken)">
+            <summary>Deletes a subject (soft delete).</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Controllers.TeacherAssignmentsController">
+            <summary>Teacher: Manage assignments (Create, Edit, Delete, Publish, Save Draft).</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherAssignmentsController.GetAssignments(AssignmentManagement.Api.Shared.PaginationParams,System.Nullable{System.Guid},System.Nullable{System.Guid},System.Nullable{AssignmentManagement.Api.Domain.Enums.AssignmentStatus},System.Threading.CancellationToken)">
+            <summary>Lists assignments created by the authenticated teacher.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherAssignmentsController.GetAssignment(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a specific assignment by ID.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherAssignmentsController.CreateAssignment(AssignmentManagement.Api.Application.DTOs.Teacher.CreateAssignmentDto,System.Threading.CancellationToken)">
+            <summary>Creates a new assignment (as Draft or Published).</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherAssignmentsController.UpdateAssignment(System.Guid,AssignmentManagement.Api.Application.DTOs.Teacher.UpdateAssignmentDto,System.Threading.CancellationToken)">
+            <summary>Edits an existing assignment.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherAssignmentsController.PublishAssignment(System.Guid,System.Threading.CancellationToken)">
+            <summary>Publishes a draft assignment to students.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherAssignmentsController.SaveDraft(System.Guid,System.Threading.CancellationToken)">
+            <summary>Saves an assignment as a draft.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherAssignmentsController.DeleteAssignment(System.Guid,System.Threading.CancellationToken)">
+            <summary>Deletes an assignment.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Controllers.TeacherSubjectsController">
+            <summary>Admin: Assign teachers to subjects and classes.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherSubjectsController.GetAll(System.Threading.CancellationToken)">
+            <summary>Lists all teacher-subject-class assignments.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherSubjectsController.GetByTeacher(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets assignments for a specific teacher.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherSubjectsController.GetByClass(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets assignments for a specific class.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherSubjectsController.AssignTeacher(AssignmentManagement.Api.Application.DTOs.Admin.AssignTeacherDto,System.Threading.CancellationToken)">
+            <summary>Assigns a teacher to a subject and class.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherSubjectsController.RemoveAssignment(System.Guid,System.Threading.CancellationToken)">
+            <summary>Removes a teacher-subject assignment.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Controllers.TeacherSubmissionsController">
+            <summary>Teacher: Review, grade, and provide feedback on student submissions.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherSubmissionsController.GetSubmissionsForAssignment(System.Guid,AssignmentManagement.Api.Shared.PaginationParams,System.Threading.CancellationToken)">
+            <summary>Lists all submissions for a specific assignment created by the teacher.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherSubmissionsController.GetSubmission(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets details of a specific submission.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherSubmissionsController.GradeSubmission(System.Guid,AssignmentManagement.Api.Application.DTOs.Teacher.GradeSubmissionDto,System.Threading.CancellationToken)">
+            <summary>Grades a student submission with marks and feedback.</summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Controllers.TeacherSubmissionsController.ChangeSubmissionStatus(System.Guid,AssignmentManagement.Api.Application.DTOs.Teacher.ChangeSubmissionStatusDto,System.Threading.CancellationToken)">
+            <summary>Changes submission status and optionally updates feedback.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Entities.Assignment">
+            <summary>
+            Represents an assignment created by a teacher for a subject and class.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Entities.BaseEntity">
+            <summary>
+            Abstract base entity providing common audit fields for all domain entities.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Entities.SchoolClass">
+            <summary>
+            Represents a school class or grade section (e.g., "Grade 10 - Section A").
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Entities.Subject">
+            <summary>
+            Represents an academic subject or course (e.g., "Mathematics", "MATH-101").
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Entities.Submission">
+            <summary>
+            Represents a student's submission in response to an assignment.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Entities.TeacherSubject">
+            <summary>
+            Junction entity linking a Teacher to a Subject within a specific SchoolClass.
+            One teacher teaches one subject in one class (unique constraint enforced).
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Entities.User">
+            <summary>
+            Represents a system user (Admin, Teacher, or Student).
+            </summary>
+        </member>
+        <member name="P:AssignmentManagement.Api.Domain.Entities.User.FullName">
+            <summary>Full name computed from first + last name.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Enums.AssignmentStatus">
+            <summary>Lifecycle status of an assignment.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Enums.SubmissionStatus">
+            <summary>Lifecycle status of a student submission.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Enums.UserRole">
+            <summary>
+            Defines the available roles within the system.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Interfaces.IClassRepository">
+            <summary>SchoolClass-specific repository operations.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Interfaces.IRepository`1">
+            <summary>
+            Generic repository interface defining standard CRUD operations.
+            </summary>
+            <typeparam name="T">The entity type.</typeparam>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Interfaces.ISubjectRepository">
+            <summary>Subject-specific repository operations.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Interfaces.ITeacherSubjectRepository">
+            <summary>TeacherSubject-specific repository operations.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Interfaces.IUnitOfWork">
+            <summary>
+            Unit of Work pattern interface to manage transactions across repositories.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Domain.Interfaces.IUserRepository">
+            <summary>
+            User-specific repository operations beyond generic CRUD.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Authentication.JwtService">
+            <summary>
+            Generates and validates JWT tokens using the configured signing key.
+            </summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Authentication.JwtService.GenerateAccessToken(AssignmentManagement.Api.Domain.Entities.User)">
+            <inheritdoc/>
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Authentication.JwtService.GenerateRefreshToken">
+            <inheritdoc/>
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Authentication.JwtService.GetPrincipalFromExpiredToken(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Authentication.JwtService.GetAccessTokenExpiry">
+            <inheritdoc/>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Authentication.JwtSettings">
+            <summary>
+            Strongly-typed JWT settings bound from appsettings.json.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Configurations.AssignmentConfiguration">
+            <summary>EF Core configuration for Assignment entity.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Configurations.SchoolClassConfiguration">
+            <summary>EF Core configuration for SchoolClass entity.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Configurations.SubjectConfiguration">
+            <summary>EF Core configuration for Subject entity.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Configurations.SubmissionConfiguration">
+            <summary>EF Core configuration for Submission entity.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Configurations.TeacherSubjectConfiguration">
+            <summary>EF Core configuration for TeacherSubject junction entity.</summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Configurations.UserConfiguration">
+            <summary>
+            EF Core type configuration for the User entity.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Persistence.ApplicationDbContext">
+            <summary>
+            Application database context managing all entity sets.
+            </summary>
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.ApplicationDbContext.SaveChangesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Overrides SaveChangesAsync to automatically set audit timestamps
+            and intercept hard deletes to convert them to soft deletes.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.AddDomainAndAdminModule">
+            <inheritdoc />
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.AddDomainAndAdminModule.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.AddDomainAndAdminModule.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.AddDomainAndAdminModule.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.AddUserClassRelationship">
+            <inheritdoc />
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.AddUserClassRelationship.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.AddUserClassRelationship.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AssignmentManagement.Api.Infrastructure.Persistence.Migrations.AddUserClassRelationship.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Repositories.GenericRepository`1">
+            <summary>
+            Generic repository implementation providing standard CRUD operations via EF Core.
+            </summary>
+            <typeparam name="T">The entity type.</typeparam>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Repositories.UnitOfWork">
+            <summary>
+            Unit of Work implementation coordinating all repository transactions.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Infrastructure.Repositories.UserRepository">
+            <summary>
+            User-specific repository providing email and refresh token lookups.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Middleware.GlobalExceptionMiddleware">
+            <summary>
+            Global exception handling middleware that catches unhandled exceptions
+            and returns a standardized error response.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Shared.ApiResponse`1">
+            <summary>
+            Standardized API response wrapper for all endpoints.
+            </summary>
+            <typeparam name="T">The type of the response data payload.</typeparam>
+        </member>
+        <member name="M:AssignmentManagement.Api.Shared.ClaimsPrincipalExtensions.GetUserId(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Extracts the authenticated User ID from claims (NameIdentifier or Sub).
+            Throws UnauthorizedAccessException if claim is missing or not a valid Guid.
+            </summary>
+        </member>
+        <member name="T:AssignmentManagement.Api.Shared.PagedResponse`1">
+            <summary>
+            Standardized paginated response wrapper.
+            </summary>
+            <typeparam name="T">The item type in the paginated list.</typeparam>
+        </member>
+        <member name="T:AssignmentManagement.Api.Shared.PaginationParams">
+            <summary>Common pagination and search parameters for list endpoints.</summary>
+        </member>
+        <member name="T:Program">
+            <summary>
+            Auto-generated public partial Program class for top-level statement apps.
+            </summary>
+        </member>
+    </members>
+</doc>

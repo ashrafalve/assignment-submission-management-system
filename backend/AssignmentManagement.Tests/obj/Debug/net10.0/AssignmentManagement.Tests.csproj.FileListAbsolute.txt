@@ -153,3 +153,4 @@ d:\opltask\backend\AssignmentManagement.Tests\obj\Debug\net10.0\refint\Assignmen
 d:\opltask\backend\AssignmentManagement.Tests\obj\Debug\net10.0\AssignmentManagement.Tests.pdb
 d:\opltask\backend\AssignmentManagement.Tests\obj\Debug\net10.0\AssignmentManagement.Tests.genruntimeconfig.cache
 d:\opltask\backend\AssignmentManagement.Tests\obj\Debug\net10.0\ref\AssignmentManagement.Tests.dll
+d:\opltask\backend\AssignmentManagement.Tests\bin\Debug\net10.0\AssignmentManagement.Api.xml

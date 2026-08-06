@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AssignmentManagement.Api.Application.DTOs.Student;
@@ -24,19 +22,6 @@ public class TeacherSubmissionsController : ControllerBase
         _service = service;
     }
 
-    private Guid GetTeacherId()
-    {
-        var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-
-        if (!Guid.TryParse(idClaim, out var teacherId))
-        {
-            throw new UnauthorizedAccessException("User ID is missing or invalid in token.");
-        }
-
-        return teacherId;
-    }
-
     /// <summary>Lists all submissions for a specific assignment created by the teacher.</summary>
     [HttpGet("assignments/{assignmentId:guid}/submissions")]
     [ProducesResponseType(typeof(ApiResponse<PagedResponse<SubmissionDto>>), 200)]
@@ -46,8 +31,7 @@ public class TeacherSubmissionsController : ControllerBase
         [FromQuery] PaginationParams pagination,
         CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.GetSubmissionsForAssignmentAsync(teacherId, assignmentId, pagination, ct);
+        var result = await _service.GetSubmissionsForAssignmentAsync(User.GetUserId(), assignmentId, pagination, ct);
         return Ok(ApiResponse<PagedResponse<SubmissionDto>>.Ok(result));
     }
 
@@ -57,8 +41,7 @@ public class TeacherSubmissionsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     public async Task<IActionResult> GetSubmission(Guid id, CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.GetSubmissionByIdAsync(teacherId, id, ct);
+        var result = await _service.GetSubmissionByIdAsync(User.GetUserId(), id, ct);
         return Ok(ApiResponse<SubmissionDto>.Ok(result));
     }
 
@@ -72,8 +55,7 @@ public class TeacherSubmissionsController : ControllerBase
         [FromBody] GradeSubmissionDto dto,
         CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.GradeSubmissionAsync(teacherId, id, dto, ct);
+        var result = await _service.GradeSubmissionAsync(User.GetUserId(), id, dto, ct);
         return Ok(ApiResponse<SubmissionDto>.Ok(result, "Submission graded successfully."));
     }
 
@@ -87,8 +69,7 @@ public class TeacherSubmissionsController : ControllerBase
         [FromBody] ChangeSubmissionStatusDto dto,
         CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.ChangeSubmissionStatusAsync(teacherId, id, dto, ct);
+        var result = await _service.ChangeSubmissionStatusAsync(User.GetUserId(), id, dto, ct);
         return Ok(ApiResponse<SubmissionDto>.Ok(result, "Submission status updated successfully."));
     }
 }

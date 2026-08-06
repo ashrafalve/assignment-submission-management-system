@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AssignmentManagement.Api.Application.DTOs.Teacher;
@@ -24,19 +22,6 @@ public class TeacherAssignmentsController : ControllerBase
         _service = service;
     }
 
-    private Guid GetTeacherId()
-    {
-        var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-
-        if (!Guid.TryParse(idClaim, out var teacherId))
-        {
-            throw new UnauthorizedAccessException("User ID is missing or invalid in token.");
-        }
-
-        return teacherId;
-    }
-
     /// <summary>Lists assignments created by the authenticated teacher.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<PagedResponse<AssignmentDto>>), 200)]
@@ -47,8 +32,7 @@ public class TeacherAssignmentsController : ControllerBase
         [FromQuery] AssignmentStatus? status,
         CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.GetTeacherAssignmentsAsync(teacherId, pagination, classId, subjectId, status, ct);
+        var result = await _service.GetTeacherAssignmentsAsync(User.GetUserId(), pagination, classId, subjectId, status, ct);
         return Ok(ApiResponse<PagedResponse<AssignmentDto>>.Ok(result));
     }
 
@@ -58,8 +42,7 @@ public class TeacherAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     public async Task<IActionResult> GetAssignment(Guid id, CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.GetAssignmentByIdAsync(teacherId, id, ct);
+        var result = await _service.GetAssignmentByIdAsync(User.GetUserId(), id, ct);
         return Ok(ApiResponse<AssignmentDto>.Ok(result));
     }
 
@@ -70,8 +53,7 @@ public class TeacherAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 401)]
     public async Task<IActionResult> CreateAssignment([FromBody] CreateAssignmentDto dto, CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.CreateAssignmentAsync(teacherId, dto, ct);
+        var result = await _service.CreateAssignmentAsync(User.GetUserId(), dto, ct);
         return StatusCode(201, ApiResponse<AssignmentDto>.Ok(result, "Assignment created successfully.", 201));
     }
 
@@ -82,8 +64,7 @@ public class TeacherAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     public async Task<IActionResult> UpdateAssignment(Guid id, [FromBody] UpdateAssignmentDto dto, CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.UpdateAssignmentAsync(teacherId, id, dto, ct);
+        var result = await _service.UpdateAssignmentAsync(User.GetUserId(), id, dto, ct);
         return Ok(ApiResponse<AssignmentDto>.Ok(result, "Assignment updated successfully."));
     }
 
@@ -93,8 +74,7 @@ public class TeacherAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     public async Task<IActionResult> PublishAssignment(Guid id, CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.PublishAssignmentAsync(teacherId, id, ct);
+        var result = await _service.PublishAssignmentAsync(User.GetUserId(), id, ct);
         return Ok(ApiResponse<AssignmentDto>.Ok(result, "Assignment published successfully."));
     }
 
@@ -104,8 +84,7 @@ public class TeacherAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     public async Task<IActionResult> SaveDraft(Guid id, CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var result = await _service.SaveDraftAssignmentAsync(teacherId, id, ct);
+        var result = await _service.SaveDraftAssignmentAsync(User.GetUserId(), id, ct);
         return Ok(ApiResponse<AssignmentDto>.Ok(result, "Assignment saved as draft successfully."));
     }
 
@@ -115,8 +94,7 @@ public class TeacherAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     public async Task<IActionResult> DeleteAssignment(Guid id, CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        await _service.DeleteAssignmentAsync(teacherId, id, ct);
+        await _service.DeleteAssignmentAsync(User.GetUserId(), id, ct);
         return Ok(ApiResponse<object?>.Ok(null, "Assignment deleted successfully."));
     }
 }

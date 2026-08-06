@@ -1,6 +1,21 @@
 # AssignmentManagement API
 
-A professional **ASP.NET Core 10** Web API following **Clean Architecture** principles for managing assignments, users, and submissions.
+A professional **ASP.NET Core 10** Web API following **Clean Architecture** principles for managing assignments, users, classes, subjects, and submissions.
+
+---
+
+## 🔑 Demo Credentials
+
+The database is automatically seeded on startup in Development mode. You can log in via `/api/auth/login` using the following credentials:
+
+| Role | Full Name | Email | Password | Class Enrollment / Assignment |
+|---|---|---|---|---|
+| 👑 **Admin** | System Admin | `admin@assignmentmanagement.com` | `Admin@1234` | System Administrator |
+| 👨‍🏫 **Teacher** | John Teacher | `john.teacher@assignmentmanagement.com` | `Teacher@1234` | Mathematics & CS (Grade 10 - Sec A) |
+| 👩‍🏫 **Teacher** | Sarah Teacher | `sarah.teacher@assignmentmanagement.com` | `Teacher@1234` | Physics & Chem (Grade 10 - Sec A) |
+| 🎓 **Student** | Alex Student | `alex.student@assignmentmanagement.com` | `Student@1234` | Enrolled in **Grade 10 - Section A** |
+| 🎓 **Student** | Emma Student | `emma.student@assignmentmanagement.com` | `Student@1234` | Enrolled in **Grade 10 - Section A** |
+| 🎓 **Student** | Liam Student | `liam.student@assignmentmanagement.com` | `Student@1234` | Enrolled in **Grade 10 - Section B** |
 
 ---
 
@@ -8,25 +23,26 @@ A professional **ASP.NET Core 10** Web API following **Clean Architecture** prin
 
 ```
 AssignmentManagement.Api/
-├── Controllers/              # API endpoints (HTTP layer)
-├── Middleware/               # Cross-cutting pipeline concerns
+├── Controllers/              # API endpoints (Admin, Auth, Teacher, Student)
+├── Middleware/               # Global exception handling & security pipeline
 ├── Domain/
-│   ├── Entities/             # Core business entities
-│   ├── Enums/                # Domain enumerations
-│   └── Interfaces/           # Repository & UoW contracts
+│   ├── Entities/             # User, SchoolClass, Subject, TeacherSubject, Assignment, Submission
+│   ├── Enums/                # UserRole, AssignmentStatus, SubmissionStatus
+│   ├── Exceptions/           # NotFoundException, ForbiddenException, BusinessRuleException
+│   └── Interfaces/           # Repositories & UnitOfWork contracts
 ├── Application/
-│   ├── DTOs/                 # Data Transfer Objects
-│   ├── Services/             # Business logic services
+│   ├── DTOs/                 # Admin, Auth, Teacher, Student DTOs
+│   ├── Services/             # AdminUserService, AuthService, ClassService, SubjectService, TeacherAssignmentService, StudentAssignmentService, TeacherSubmissionService
 │   ├── Interfaces/           # Service contracts
 │   ├── Validators/           # FluentValidation validators
 │   └── Mapping/              # AutoMapper profiles
 ├── Infrastructure/
-│   ├── Persistence/          # EF Core DbContext
-│   ├── Repositories/         # Repository implementations
-│   ├── Authentication/       # JWT settings & helpers
-│   └── Configurations/       # EF entity type configurations
-├── Shared/                   # Shared models (ApiResponse, PagedResponse)
-└── Tests/                    # Unit & Integration tests
+│   ├── Persistence/          # ApplicationDbContext, DbSeeder, Migrations
+│   ├── Repositories/         # EF Core generic & entity-specific repositories
+│   ├── Authentication/       # JwtService & JwtSettings
+│   └── Configurations/       # Fluent API entity configurations
+├── Shared/                   # ApiResponse<T>, PagedResponse<T>, PaginationParams
+└── Tests/                    # xUnit + Moq unit test suite
 ```
 
 ---
@@ -35,119 +51,47 @@ AssignmentManagement.Api/
 
 | Technology | Purpose |
 |---|---|
-| ASP.NET Core 10 | Web framework |
-| Entity Framework Core 10 | ORM |
-| PostgreSQL | Database |
-| JWT Bearer | Authentication |
-| AutoMapper | Object mapping |
-| FluentValidation | Input validation |
-| Swashbuckle | Swagger / OpenAPI docs |
-| Serilog | Structured logging |
-| xUnit + Moq | Testing |
+| ASP.NET Core 10 | Web API framework |
+| Entity Framework Core 10 | ORM & PostgreSQL Data Access |
+| PostgreSQL | Relational Database |
+| JWT Bearer | Token-based Authentication |
+| AutoMapper | DTO Mapping |
+| FluentValidation | Request Validation |
+| Swashbuckle / Swagger UI | OpenAPI Interactive Docs |
+| Serilog | Structured Logging |
+| xUnit + Moq + FluentAssertions | Unit Testing |
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [PostgreSQL 16+](https://www.postgresql.org/download/)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) *(optional)*
-
-### 1. Clone & Configure
-
-```bash
-git clone <repo-url>
-cd backend/AssignmentManagement.Api
-
-# Copy and edit environment variables
-cp .env.example .env
-# Edit .env with your database credentials and JWT secret
-```
-
-### 2. Run with Docker (Recommended)
+### 1. Run with Docker Compose
 
 ```bash
 cd backend
 docker-compose up --build
 ```
 
-API: http://localhost:5000  
-Swagger UI: http://localhost:5000 (Development only)
+- API: `http://localhost:5000`
+- Swagger UI: `http://localhost:5000`
 
-### 3. Run Locally
+### 2. Run Locally
 
 ```bash
 cd backend/AssignmentManagement.Api
-
-# Install dependencies
 dotnet restore
-
-# Apply database migrations
 dotnet ef database update
-
-# Run the API
 dotnet run
 ```
 
 ---
 
-## 📋 Environment Variables
+## 🧪 Unit Tests
 
-| Variable | Description | Default |
-|---|---|---|
-| `DB_HOST` | PostgreSQL host | `localhost` |
-| `DB_PORT` | PostgreSQL port | `5432` |
-| `DB_NAME` | Database name | `assignment_management` |
-| `DB_USER` | Database user | `postgres` |
-| `DB_PASSWORD` | Database password | — |
-| `JWT_SECRET_KEY` | JWT signing key (min 32 chars) | — |
-| `JWT_ISSUER` | JWT token issuer | `AssignmentManagement.Api` |
-| `JWT_AUDIENCE` | JWT token audience | `AssignmentManagement.Client` |
-
----
-
-## 🔗 Endpoints
-
-| Method | Route | Description |
-|---|---|---|
-| `GET` | `/` | Swagger UI (Dev only) |
-| `GET` | `/health` | Health check (HealthChecks UI format) |
-| `GET` | `/api/health` | Health check (JSON API format) |
-
-> Business logic endpoints will be added in subsequent steps.
-
----
-
-## 🗄️ Database Migrations
+Run the xUnit test suite (14 passing tests):
 
 ```bash
-# Add a new migration
-dotnet ef migrations add <MigrationName>
-
-# Apply migrations
-dotnet ef database update
-
-# Revert last migration
-dotnet ef migrations remove
-```
-
----
-
-## 📝 Logging
-
-Logs are written to:
-- **Console** — structured output during development
-- **`logs/log-{date}.txt`** — rolling daily files (14-day retention)
-
-Log level is controlled via `appsettings.json` → `Serilog.MinimumLevel`.
-
----
-
-## 🧪 Testing
-
-```bash
-cd backend/AssignmentManagement.Api/Tests
+cd backend/AssignmentManagement.Tests
 dotnet test
 ```
 
@@ -155,4 +99,4 @@ dotnet test
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License

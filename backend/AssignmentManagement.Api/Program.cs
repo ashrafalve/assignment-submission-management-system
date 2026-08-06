@@ -154,6 +154,13 @@ try
             Contact     = new OpenApiContact { Name = "API Support", Email = "support@assignmentmanagement.com" }
         });
 
+        var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath))
+        {
+            options.IncludeXmlComments(xmlPath);
+        }
+
         // JWT security definition
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
@@ -178,12 +185,6 @@ try
                 Array.Empty<string>()
             }
         });
-
-        // Include XML comments
-        var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-        if (File.Exists(xmlPath))
-            options.IncludeXmlComments(xmlPath);
     });
 
     // ─── Health Checks ────────────────────────────────────────────────────────
@@ -242,12 +243,12 @@ try
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
     });
 
-    // ─── Auto-migrate on startup (development only) ───────────────────────────
+    // ─── Auto-migrate & seed database on startup (development only) ───────────
     if (app.Environment.IsDevelopment())
     {
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await db.Database.MigrateAsync();
+        await DbSeeder.SeedAsync(db);
     }
 
     Log.Information("AssignmentManagement API started successfully.");

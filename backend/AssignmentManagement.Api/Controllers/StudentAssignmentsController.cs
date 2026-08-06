@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AssignmentManagement.Api.Application.DTOs.Student;
@@ -24,19 +22,6 @@ public class StudentAssignmentsController : ControllerBase
         _service = service;
     }
 
-    private Guid GetStudentId()
-    {
-        var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-
-        if (!Guid.TryParse(idClaim, out var studentId))
-        {
-            throw new UnauthorizedAccessException("User ID is missing or invalid in token.");
-        }
-
-        return studentId;
-    }
-
     /// <summary>Lists published assignments for the student's assigned class.</summary>
     [HttpGet("assignments")]
     [ProducesResponseType(typeof(ApiResponse<PagedResponse<AssignmentDto>>), 200)]
@@ -45,8 +30,7 @@ public class StudentAssignmentsController : ControllerBase
         [FromQuery] Guid? subjectId,
         CancellationToken ct)
     {
-        var studentId = GetStudentId();
-        var result = await _service.GetPublishedAssignmentsAsync(studentId, pagination, subjectId, ct);
+        var result = await _service.GetPublishedAssignmentsAsync(User.GetUserId(), pagination, subjectId, ct);
         return Ok(ApiResponse<PagedResponse<AssignmentDto>>.Ok(result));
     }
 
@@ -56,8 +40,7 @@ public class StudentAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     public async Task<IActionResult> GetAssignmentDetails(Guid id, CancellationToken ct)
     {
-        var studentId = GetStudentId();
-        var result = await _service.GetAssignmentDetailsAsync(studentId, id, ct);
+        var result = await _service.GetAssignmentDetailsAsync(User.GetUserId(), id, ct);
         return Ok(ApiResponse<StudentAssignmentDetailDto>.Ok(result));
     }
 
@@ -67,8 +50,7 @@ public class StudentAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 400)]
     public async Task<IActionResult> SubmitAssignment([FromBody] SubmitAssignmentDto dto, CancellationToken ct)
     {
-        var studentId = GetStudentId();
-        var result = await _service.SubmitAssignmentAsync(studentId, dto, ct);
+        var result = await _service.SubmitAssignmentAsync(User.GetUserId(), dto, ct);
         return StatusCode(201, ApiResponse<SubmissionDto>.Ok(result, "Assignment submitted successfully.", 201));
     }
 
@@ -79,8 +61,7 @@ public class StudentAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     public async Task<IActionResult> UpdateSubmission(Guid id, [FromBody] UpdateSubmissionDto dto, CancellationToken ct)
     {
-        var studentId = GetStudentId();
-        var result = await _service.UpdateSubmissionAsync(studentId, id, dto, ct);
+        var result = await _service.UpdateSubmissionAsync(User.GetUserId(), id, dto, ct);
         return Ok(ApiResponse<SubmissionDto>.Ok(result, "Submission updated successfully."));
     }
 
@@ -89,8 +70,7 @@ public class StudentAssignmentsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<SubmissionDto>>), 200)]
     public async Task<IActionResult> GetMySubmissions(CancellationToken ct)
     {
-        var studentId = GetStudentId();
-        var result = await _service.GetMySubmissionsAsync(studentId, ct);
+        var result = await _service.GetMySubmissionsAsync(User.GetUserId(), ct);
         return Ok(ApiResponse<IEnumerable<SubmissionDto>>.Ok(result));
     }
 }
