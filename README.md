@@ -1,10 +1,10 @@
-# Assignment & Submission Management System
+# AcademiaFlow - Academic Assignment & Submission Management System
 
 A full-stack, enterprise-grade application for managing academic assignments, student submissions, teacher reviews, and school administration.
 
 ---
 
-## ⚡ Quick Start Instructions
+## Quick Start Instructions
 
 ### 1. Start Database & Backend API (.NET 10 & EF Core)
 

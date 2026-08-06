@@ -39,10 +39,10 @@ export function Pagination({
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
             className="ml-2 h-7 rounded border border-input bg-background px-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           >
-            <option value={5}>5 / page</option>
-            <option value={10}>10 / page</option>
-            <option value={20}>20 / page</option>
-            <option value={50}>50 / page</option>
+            <option value={5} className="bg-card text-card-foreground dark:bg-slate-900 dark:text-slate-100">5 / page</option>
+            <option value={10} className="bg-card text-card-foreground dark:bg-slate-900 dark:text-slate-100">10 / page</option>
+            <option value={20} className="bg-card text-card-foreground dark:bg-slate-900 dark:text-slate-100">20 / page</option>
+            <option value={50} className="bg-card text-card-foreground dark:bg-slate-900 dark:text-slate-100">50 / page</option>
           </select>
         )}
       </div>

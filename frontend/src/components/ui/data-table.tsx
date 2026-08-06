@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { HiMagnifyingGlass, HiChevronUpDown, HiChevronUp, HiChevronDown } from 'react-icons/hi2';
 import { Input } from './input';
 import { TableSkeleton } from './skeleton';
 import { EmptyState } from './empty-state';
@@ -71,27 +71,27 @@ export function DataTable<T>({
       {onSearch && (
         <div className="flex items-center justify-between gap-4">
           <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <HiMagnifyingGlass className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={searchPlaceholder}
-              className="pl-9 h-10 shadow-sm"
+              className="pl-10 h-10 rounded-xl bg-card/60 border-border/80 text-sm shadow-xs focus:bg-card transition-all"
             />
           </div>
         </div>
       )}
 
       {/* Table Container */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm transition-all">
+      <div className="rounded-2xl border border-border/80 bg-card/80 backdrop-blur-md overflow-hidden shadow-sm transition-all">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
+            <thead className="bg-accent/50 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/70">
               <tr>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className={cn('px-4 py-3.5 font-semibold select-none', col.className)}
+                    className={cn('px-4 py-3.5 font-bold select-none', col.className)}
                   >
                     {col.sortable ? (
                       <button
@@ -101,12 +101,12 @@ export function DataTable<T>({
                         {col.header}
                         {sortKey === col.key ? (
                           sortDesc ? (
-                            <ArrowDown className="h-3.5 w-3.5 text-primary" />
+                            <HiChevronDown className="h-4 w-4 text-indigo-500 font-bold" />
                           ) : (
-                            <ArrowUp className="h-3.5 w-3.5 text-primary" />
+                            <HiChevronUp className="h-4 w-4 text-indigo-500 font-bold" />
                           )
                         ) : (
-                          <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />
+                          <HiChevronUpDown className="h-4 w-4 opacity-40" />
                         )}
                       </button>
                     ) : (
@@ -117,7 +117,7 @@ export function DataTable<T>({
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-border/60">
+            <tbody className="divide-y divide-border/50">
               {isLoading ? (
                 <tr>
                   <td colSpan={columns.length} className="p-4">
@@ -139,10 +139,10 @@ export function DataTable<T>({
                 data.map((row) => (
                   <tr
                     key={keyExtractor(row)}
-                    className="hover:bg-accent/40 transition-colors group"
+                    className="hover:bg-accent/50 transition-colors group"
                   >
                     {columns.map((col) => (
-                      <td key={col.key} className={cn('px-4 py-3 text-foreground', col.className)}>
+                      <td key={col.key} className={cn('px-4 py-3.5 text-foreground font-medium', col.className)}>
                         {col.cell ? col.cell(row) : (row as any)[col.key]}
                       </td>
                     ))}

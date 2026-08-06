@@ -79,9 +79,23 @@ public static class DbSeeder
             await context.SaveChangesAsync();
         }
 
-        var mathSub = await context.Subjects.FirstAsync(s => s.Code == "MATH-101");
-        var csSub   = await context.Subjects.FirstAsync(s => s.Code == "CS-101");
-        var sciSub  = await context.Subjects.FirstAsync(s => s.Code == "SCI-101");
+        var mathSub = await context.Subjects.FirstOrDefaultAsync(s => s.Code == "MATH-101") ?? await context.Subjects.FirstAsync();
+        var sciSub  = await context.Subjects.FirstOrDefaultAsync(s => s.Code == "SCI-101") ?? await context.Subjects.FirstAsync();
+        var csSub   = await context.Subjects.FirstOrDefaultAsync(s => s.Code == "CS-101");
+
+        if (csSub == null)
+        {
+            csSub = new Subject
+            {
+                Id = new Guid("20000000-0000-0000-0000-000000000002"),
+                Name = "Computer Science",
+                Code = "CS-101",
+                Description = "Algorithms, Data Structures & Python Programming",
+                IsActive = true
+            };
+            await context.Subjects.AddAsync(csSub);
+            await context.SaveChangesAsync();
+        }
 
         // 3. Seed Users (Admin, Teachers, Students) if none exist beyond default admin
         if (await context.Users.CountAsync() <= 1)

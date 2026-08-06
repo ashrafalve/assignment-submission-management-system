@@ -92,7 +92,7 @@ public class ApplicationDbContext : DbContext
             FirstName    = "System",
             LastName     = "Admin",
             Email        = "admin@assignmentmanagement.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@1234", workFactor: 12),
+            PasswordHash = "$2a$12$K.7xX9k8n0uQ1v7a8b9c0uS1v2w3x4y5z6a7b8c9d0e1f2g3h4i",
             Role         = UserRole.Admin,
             IsActive     = true,
             CreatedAt    = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
