@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: ./AssignmentManagement.Api
+      dockerfile: Dockerfile
+    container_name: assignment_api
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=assignment_management
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - JWT_SECRET_KEY=dev-super-secret-jwt-key-min-32-chars-long
+      - JWT_ISSUER=AssignmentManagement.Api
+      - JWT_AUDIENCE=AssignmentManagement.Client
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - assignment_network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: assignment_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: assignment_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - assignment_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  assignment_network:
+    driver: bridge

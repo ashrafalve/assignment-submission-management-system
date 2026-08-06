@@ -1,0 +1,43 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+## .NET / Build Outputs
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.swp
+*.vs/
+.vs/
+
+## Secrets & Environment
+.env
+*.pfx
+*.key
+secrets.json
+appsettings.Local.json
+
+## Logs
+logs/
+*.log
+
+## Test Results
+TestResults/
+coverage/
+*.trx
+*.coveragexml
+
+## dotnet publish
+publish/
+out/
+
+## NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+packages/
+.nuget/
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini
